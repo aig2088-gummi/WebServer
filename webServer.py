@@ -8,63 +8,66 @@ def webServer(port=13331):
     # Create a TCP socket using IPv4
     serverSocket = socket(AF_INET, SOCK_STREAM)
 
-    # Allow the port to be reused right after program exit
-    serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)f
+    # Allow immediate reuse of the port after the server stops
+    serverSocket.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 
-    # Prepare a server socket
+    # Prepare a server socket: bind it to the given port and start listening
     serverSocket.bind(("", port))
-
-    # Start listening for incoming connections (max 1 queued connection here)
-    serverSocket.listen(1)
-    print("Server is ready to serve on port...", port)
+    serverSocket.listen(1)  # Queue up to 1 client connection
+    print("Ready to serve on port...", port)
 
     while True:
-        # Establish the connection
-        print('Ready to serve...')
-        connectionSocket, addr = serverSocket.accept()  # Accept a client connection
+        print('Waiting for connection...')
+        # Accept client connection
+        connectionSocket, addr = serverSocket.accept()
+        print(f"Connection established with {addr}")
 
         try:
             # Receive client request
             message = connectionSocket.recv(1024).decode()
-            print("Request:", message)
+            print("Request received:\n", message)
 
-            # Get the requested filename from the HTTP request line
+            # Parse filename from HTTP GET request (second token after 'GET')
             filename = message.split()[1]
 
-            # Open the requested file
-            f = open(filename[1:], "rb")  # Open in binary mode since we’ll send over socket
+            # Open the requested file (strip leading slash, open in binary mode)
+            f = open(filename[1:], 'rb')
 
-            # Create HTTP response header for 200 OK
+            # Build a valid HTTP response header
             header = "HTTP/1.1 200 OK\r\n"
             header += "Content-Type: text/html; charset=UTF-8\r\n"
-            header += "\r\n"  # Blank line to end headers
+            header += "Server: SimplePythonServer\r\n"
+            header += "Connection: close\r\n"
+            header += "\r\n"  # Blank line signals end of header
 
-            # Read file content
-            file_content = f.read()
+            # Read the file content
+            fileContent = f.read()
 
-            # Send header + file content
-            connectionSocket.sendall(header.encode() + file_content)
+            # Send header and file content together
+            connectionSocket.sendall(header.encode() + fileContent)
 
-            # Close the connection
+            # Close file and client connection
+            f.close()
             connectionSocket.close()
 
-        except Exception as e:
-            # Send 404 response if file not found or another error occurs
+        except Exception:
+            # File not found or another error occurred -> send 404 response
             header = "HTTP/1.1 404 Not Found\r\n"
             header += "Content-Type: text/html; charset=UTF-8\r\n"
+            header += "Server: SimplePythonServer\r\n"
+            header += "Connection: close\r\n"
             header += "\r\n"
-            body = "<html><body><h1>404 Not Found</h1></body></html>"
 
-            # Send header + error message
+            # Simple HTML body for error message
+            body = "<html><head></head><body><h1>404 Not Found</h1></body></html>"
+
+            # Send the error response
             connectionSocket.sendall(header.encode() + body.encode())
 
-            # Close the connection
+            # Close the client connection
             connectionSocket.close()
 
-    # Never reached in Gradescope, left here for local testing
-    # serverSocket.close()
-    # sys.exit()  # Terminate the program after sending the corresponding data
 
-
+# Entry point
 if __name__ == "__main__":
     webServer(13331)
