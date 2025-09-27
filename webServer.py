@@ -4,6 +4,24 @@ from socket import *
 import sys
 
 
+
+
+# Example of how to structure the response
+response_body = "<h1>Hello, World!</h1>"
+content_length = len(response_body.encode('utf-8'))
+
+response_headers = (
+    "HTTP/1.1 200 OK\r\n"
+    "Server: MyCustomPythonServer\r\n"  # Add the Server header
+    "Connection: close\r\n"              # Add the Connection header
+    "Content-Type: text/html\r\n"
+    f"Content-Length: {content_length}\r\n"
+    "\r\n"  # A blank line indicates the end of headers
+)
+
+full_response = response_headers.encode('utf-8') + response_body.encode('utf-8')
+
+
 def webServer(port=13331):
     serverSocket = socket(AF_INET, SOCK_STREAM)
 
