@@ -28,8 +28,7 @@ def webServer(port=13331):
             header = "HTTP/1.1 200 OK\r\n"
             contentType = "Content-Type: text/html; charset=UTF-8\r\n"
             endOfHeader = "\r\n"
-            server = "Server: PythonWebServer/1.0\r\n"
-            connection = "Connection: close\r\n"
+
 
             # Read the file content
             fileContent = f.read()
@@ -47,11 +46,12 @@ def webServer(port=13331):
         except Exception as e:
             # Send response message for file not found
             header = "HTTP/1.1 404 Not Found\r\n"
+            server = "Server: PythonWebServer/1.0\r\n"
+            connection = "Connection: close\r\n"
             contentType = "Content-Type: text/html; charset=UTF-8\r\n"
             endOfHeader = "\r\n"
             body = "<html><head></head><body><h1>404 Not Found</h1></body></html>\r\n"
-            server = "Server: PythonWebServer/1.0\r\n"
-            connection = "Connection: close\r\n"
+
 
             response = header + contentType + endOfHeader + body
             connectionSocket.send(response.encode())
