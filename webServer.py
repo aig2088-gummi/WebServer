@@ -26,6 +26,8 @@ def webServer(port=13331):
 
             # Send HTTP response header line for a successful request
             header = "HTTP/1.1 200 OK\r\n"
+            Server: PythonWebServer / 1.0
+            Connection: close
             contentType = "Content-Type: text/html; charset=UTF-8\r\n"
             endOfHeader = "\r\n"
 
@@ -46,8 +48,6 @@ def webServer(port=13331):
         except Exception as e:
             # Send response message for file not found
             header = "HTTP/1.1 404 Not Found\r\n"
-            server = "Server: PythonWebServer/1.0\r\n"
-            connection = "Connection: close\r\n"
             contentType = "Content-Type: text/html; charset=UTF-8\r\n"
             endOfHeader = "\r\n"
             body = "<html><head></head><body><h1>404 Not Found</h1></body></html>\r\n"
